@@ -1,4 +1,4 @@
-package com.ansari.projects.lovable_clone.entity;
+package com.ansari.projects.lovable_clone.entities;
 
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
@@ -12,18 +12,17 @@ import java.time.Instant;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UsageLog {
+public class Project {
 
     Long id;
-    User user;
-    Project project;
 
-    String action;
+    String name;
 
-    Integer tokensUsed;
-    Integer durationMs;
+    User owner;
 
-    String metaData; //JSON of (model_used, prompt_used)
+    Boolean isPublid = false;
 
     Instant createdAt;
+    Instant updatedAt;
+    Instant deletedAt;
 }

@@ -1,4 +1,4 @@
-package com.ansari.projects.lovable_clone.entity;
+package com.ansari.projects.lovable_clone.entities;
 
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
@@ -12,16 +12,21 @@ import java.time.Instant;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
+public class ProjectFile {
 
     Long id;
 
-    String email;
-    String passwordHash;
-    String name;
+    Project project;
 
-    String avatarUrl;
+    String path;
+
+    String minioObjectKey;
+
     Instant createdAt;
+
     Instant updatedAt;
-    Instant deletedAt; //soft delete
+
+    User createdBy;
+
+    User updatedBy;
 }

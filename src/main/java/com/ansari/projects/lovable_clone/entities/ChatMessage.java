@@ -1,5 +1,6 @@
-package com.ansari.projects.lovable_clone.entity;
+package com.ansari.projects.lovable_clone.entities;
 
+import com.ansari.projects.lovable_clone.enums.MessageRole;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,17 +13,18 @@ import java.time.Instant;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Project {
+public class ChatMessage {
 
     Long id;
+    ChatSession chatSession;
 
-    String name;
+    String content;
 
-    User owner;
+    MessageRole role;
 
-    Boolean isPublid = false;
+    String toolCalls; //JSON Array of Tools Called
+
+    Integer tokensUsed;
 
     Instant createdAt;
-    Instant updatedAt;
-    Instant deletedAt;
 }

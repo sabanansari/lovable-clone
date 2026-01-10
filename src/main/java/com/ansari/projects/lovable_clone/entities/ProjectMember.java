@@ -1,5 +1,6 @@
-package com.ansari.projects.lovable_clone.entity;
+package com.ansari.projects.lovable_clone.entities;
 
+import com.ansari.projects.lovable_clone.enums.ProjectRole;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -12,15 +13,16 @@ import java.time.Instant;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ChatSession {
+public class ProjectMember {
+
+    ProjectMemberId id;
 
     Project project;
 
     User user;
 
-    String title;
+    ProjectRole projectRole;
 
-    Instant createdAt;
-    Instant updatedAt;
-    Instant deletedAt;
+    Instant invitedAt;
+    Instant acceptedAt;
 }

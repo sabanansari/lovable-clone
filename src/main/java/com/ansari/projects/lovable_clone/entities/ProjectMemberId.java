@@ -1,4 +1,4 @@
-package com.ansari.projects.lovable_clone.entity;
+package com.ansari.projects.lovable_clone.entities;
 
 public class ProjectMemberId {
 
