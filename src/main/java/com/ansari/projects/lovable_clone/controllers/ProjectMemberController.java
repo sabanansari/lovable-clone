@@ -2,10 +2,9 @@ package com.ansari.projects.lovable_clone.controllers;
 
 import com.ansari.projects.lovable_clone.dto.member.InviteMemberRequest;
 import com.ansari.projects.lovable_clone.dto.member.MemberResponse;
-import com.ansari.projects.lovable_clone.entities.ProjectMember;
+import com.ansari.projects.lovable_clone.dto.member.UpdateMemberRoleRequest;
 import com.ansari.projects.lovable_clone.services.ProjectMemberService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,7 @@ public class ProjectMemberController {
     private final ProjectMemberService projectMemberService;
 
     @GetMapping
-    public ResponseEntity<List<ProjectMember>> getProjectMembers(@PathVariable Long projectId){
+    public ResponseEntity<List<MemberResponse>> getProjectMembers(@PathVariable Long projectId){
        Long userId = 1L;
        return ResponseEntity.ok(projectMemberService.getProjectMembers(projectId,userId));
     }
@@ -40,7 +39,7 @@ public class ProjectMemberController {
     public ResponseEntity<MemberResponse> updateMemberRole(
             @PathVariable Long projectId,
             @PathVariable Long memberId,
-            @RequestBody InviteMemberRequest request
+            @RequestBody UpdateMemberRoleRequest request
     ){
         Long userId  = 1L;
         return ResponseEntity.ok(projectMemberService.updateMemberRole(projectId,memberId,request,userId));
@@ -48,7 +47,7 @@ public class ProjectMemberController {
     }
 
     @DeleteMapping("/{memberId}")
-    public ResponseEntity<MemberResponse> updateMemberRole(
+    public ResponseEntity<MemberResponse> deleteMember(
             @PathVariable Long projectId,
             @PathVariable Long memberId
     ){

@@ -1,17 +1,17 @@
 package com.ansari.projects.lovable_clone.entities;
 
 import com.ansari.projects.lovable_clone.enums.ProjectRole;
-import jakarta.persistence.Entity;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 
-@Entity
+
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProjectMember {
 

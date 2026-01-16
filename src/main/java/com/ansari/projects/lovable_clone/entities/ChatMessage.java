@@ -1,21 +1,28 @@
 package com.ansari.projects.lovable_clone.entities;
 
 import com.ansari.projects.lovable_clone.enums.MessageRole;
-import jakarta.persistence.Entity;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
-@Entity
+
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChatMessage {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
+    @OneToOne
     ChatSession chatSession;
 
     String content;
@@ -26,5 +33,9 @@ public class ChatMessage {
 
     Integer tokensUsed;
 
+    @CreationTimestamp
     Instant createdAt;
+
+    @UpdateTimestamp
+    Instant updatedAt;
 }
