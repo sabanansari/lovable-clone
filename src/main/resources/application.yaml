@@ -17,3 +17,5 @@ spring:
 
 jwt:
   secret-key: gfhgfdhdffhgfhgfhgfhgfhgfladfdlfkad32432432432424234324kldfasdklfadsjlkfj324324234slkdfjasdlkfjsadl32
+
+client.url: http://localhost:8080

@@ -1,13 +1,10 @@
 package com.ansari.projects.lovable_clone.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-
+@Entity
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,7 +19,10 @@ public class Plan {
 
     String name;
 
+    @Column(unique = true)
     String stripePriceId;
+
+
     Integer maxProjects;
     Integer maxTokenPerDay;
     Integer maxPreviews;
