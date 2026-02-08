@@ -6,6 +6,7 @@ import com.ansari.projects.lovable_clone.dto.subscription.PortalResponse;
 import com.ansari.projects.lovable_clone.entities.Plan;
 import com.ansari.projects.lovable_clone.entities.User;
 import com.ansari.projects.lovable_clone.enums.SubscriptionStatus;
+import com.ansari.projects.lovable_clone.error.BadRequestException;
 import com.ansari.projects.lovable_clone.error.ResourceNotFoundException;
 import com.ansari.projects.lovable_clone.repository.PlanRepository;
 import com.ansari.projects.lovable_clone.repository.UserRepository;
@@ -85,7 +86,29 @@ public class StripePaymentProcessor implements PaymentProcessor {
 
     @Override
     public PortalResponse openCustomerPortal() {
-        return null;
+
+        Long userId = authUtil.getCurrentUserId();
+        User user = getUser(userId);
+
+        String stripeCustomerId = user.getStripeCustomerId();
+
+        if(stripeCustomerId == null || stripeCustomerId.isEmpty()){
+            log.error("User with ID {} does not have a Stripe customer ID", userId);
+            throw new BadRequestException("No Stripe customer ID found for user,userId: " + userId);
+        }
+
+        try {
+            var portalParams = com.stripe.model.billingportal.Session.create(
+                    com.stripe.param.billingportal.SessionCreateParams.builder()
+                            .setCustomer(stripeCustomerId)
+                            .setReturnUrl(clientUrl)
+                            .build()
+            );
+
+            return new PortalResponse(portalParams.getUrl());
+        } catch (StripeException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

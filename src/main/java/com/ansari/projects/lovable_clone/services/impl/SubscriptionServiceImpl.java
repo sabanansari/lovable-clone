@@ -8,11 +8,14 @@ import com.ansari.projects.lovable_clone.enums.SubscriptionStatus;
 import com.ansari.projects.lovable_clone.error.ResourceNotFoundException;
 import com.ansari.projects.lovable_clone.mapper.SubscriptionMapper;
 import com.ansari.projects.lovable_clone.repository.PlanRepository;
+import com.ansari.projects.lovable_clone.repository.ProjectMemberRepository;
 import com.ansari.projects.lovable_clone.repository.SubscriptionRepository;
 import com.ansari.projects.lovable_clone.repository.UserRepository;
 import com.ansari.projects.lovable_clone.security.AuthUtil;
 import com.ansari.projects.lovable_clone.services.SubscriptionService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -20,6 +23,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     private final AuthUtil authUtil;
@@ -27,6 +31,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionMapper subscriptionMapper;
     private final PlanRepository planRepository;
     private final UserRepository userRepository;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final Integer ALLOWED_FREE_TIER_PROJECTS = 1;
 
     @Override
     public SubscriptionResponse getCurrentSubscription() {
@@ -64,21 +70,52 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public void updateSubscription(String id, SubscriptionStatus status, Instant periodStart, Instant periodEnd, Boolean cancelAtPeriodEnd, Long planId) {
-        Subscription subscription = subscriptionRepository.findById(Long.parseLong(id)).orElseThrow(
-                () -> new RuntimeException("Subscription not found with id: " + id)
-        );
-        subscription.setStatus(status);
-        subscription.setCurrentPeriodStart(periodStart);
-        subscription.setCurrentPeriodEnd(periodEnd);
-        subscription.setCancelAtPeriodEnd(cancelAtPeriodEnd);
-        subscription.setPlan(getPlan(planId));
-        subscriptionRepository.save(subscription);
+    @Transactional
+    public void updateSubscription(String gatewaySubscriptionId, SubscriptionStatus status, Instant periodStart, Instant periodEnd, Boolean cancelAtPeriodEnd, Long planId) {
+        Subscription subscription = getSubscription(gatewaySubscriptionId);
+
+        boolean hasSubscriptionUpdated = false;
+
+        if(status !=null && status != subscription.getStatus()) {
+            log.info("Updating subscription status for gateway ID {} from {} to {}", gatewaySubscriptionId, subscription.getStatus(), status);
+            subscription.setStatus(status);
+            hasSubscriptionUpdated = true;
+        }
+
+        if(periodStart != null && !periodStart.equals(subscription.getCurrentPeriodStart())){
+            subscription.setCurrentPeriodStart(periodStart);
+            hasSubscriptionUpdated = true;
+        }
+
+        if(periodEnd != null && !periodEnd.equals(subscription.getCurrentPeriodEnd())){
+            subscription.setCurrentPeriodEnd(periodEnd);
+            hasSubscriptionUpdated = true;
+        }
+
+        if(cancelAtPeriodEnd != null && !cancelAtPeriodEnd.equals(subscription.getCancelAtPeriodEnd())){
+            subscription.setCancelAtPeriodEnd(cancelAtPeriodEnd);
+            hasSubscriptionUpdated = true;
+        }
+
+        if(planId != null && !planId.equals(subscription.getPlan().getId())){
+            subscription.setPlan(getPlan(planId));
+            hasSubscriptionUpdated = true;
+        }
+
+        if(hasSubscriptionUpdated){
+            log.info("Subscription with gateway ID {} has been updated", gatewaySubscriptionId);
+            subscriptionRepository.save(subscription);
+        }
+
+
     }
 
     @Override
-    public void cancelSubscription(String id) {
+    public void cancelSubscription(String gatewaySubscriptionId) {
 
+        Subscription subscription = getSubscription(gatewaySubscriptionId);
+        subscription.setStatus(SubscriptionStatus.CANCELED);
+        subscriptionRepository.save(subscription);
     }
 
     @Override
@@ -98,8 +135,34 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public void markSubscriptionAsPastDue(String subId) {
+    public void markSubscriptionAsPastDue(String gatewaySubscriptionId) {
 
+        Subscription subscription = getSubscription(gatewaySubscriptionId);
+
+        if(subscription.getStatus()== SubscriptionStatus.PAST_DUE){
+            log.debug("Subscription with gateway ID {} is already marked as PAST_DUE", gatewaySubscriptionId);
+            return;
+        }
+
+        subscription.setStatus(SubscriptionStatus.PAST_DUE);
+        subscriptionRepository.save(subscription);
+
+        // Send email notification
+    }
+
+    @Override
+    public boolean canCreateProject() {
+        Long userId = authUtil.getCurrentUserId();
+
+        SubscriptionResponse currentSubscription = getCurrentSubscription();
+
+        int countOfOwnedProjects = projectMemberRepository.countProjectOwnedByUser(userId);
+
+        if(currentSubscription.plan() == null){
+            return countOfOwnedProjects < ALLOWED_FREE_TIER_PROJECTS;
+        }
+
+        return currentSubscription.plan().maxProjects() > countOfOwnedProjects;
     }
 
     private User getUser(Long userId) {

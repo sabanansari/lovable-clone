@@ -8,6 +8,7 @@ import com.ansari.projects.lovable_clone.entities.ProjectMember;
 import com.ansari.projects.lovable_clone.entities.ProjectMemberId;
 import com.ansari.projects.lovable_clone.entities.User;
 import com.ansari.projects.lovable_clone.enums.ProjectRole;
+import com.ansari.projects.lovable_clone.error.BadRequestException;
 import com.ansari.projects.lovable_clone.error.ResourceNotFoundException;
 import com.ansari.projects.lovable_clone.mapper.ProjectMapper;
 import com.ansari.projects.lovable_clone.repository.ProjectMemberRepository;
@@ -15,6 +16,7 @@ import com.ansari.projects.lovable_clone.repository.ProjectRepository;
 import com.ansari.projects.lovable_clone.repository.UserRepository;
 import com.ansari.projects.lovable_clone.security.AuthUtil;
 import com.ansari.projects.lovable_clone.services.ProjectService;
+import com.ansari.projects.lovable_clone.services.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -36,15 +38,22 @@ public class ProjectServiceImpl implements ProjectService {
     UserRepository userRepository;
     ProjectMapper projectMapper;
     AuthUtil authUtil;
+    SubscriptionService subscriptionService;
 
     @Override
     public ProjectResponse createProject(ProjectRequest request) {
+
+        if(!subscriptionService.canCreateProject()){
+            throw new BadRequestException("Cannot create newd project with current plan, upgrade plan now.");
+        }
+
         Long userId = authUtil.getCurrentUserId();
 //        User owner = userRepository.findById(userId).orElseThrow(
 //                () -> new ResourceNotFoundException("User", userId.toString())
 //        );
 
         User owner = userRepository.getReferenceById(userId); //It will provide Hibernate proxy, won't hit database
+
         Project project = Project.builder()
                 .name(request.name())
                 .isPublic(false)
