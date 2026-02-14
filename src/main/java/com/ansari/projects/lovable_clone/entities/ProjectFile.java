@@ -1,9 +1,6 @@
 package com.ansari.projects.lovable_clone.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,6 +14,8 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Entity
+@Table(name = "project_files")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProjectFile {
 
@@ -24,8 +23,11 @@ public class ProjectFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-  //  Project project;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id",nullable = false)
+    Project project;
 
+    @Column(nullable = false)
     String path;
 
     String minioObjectKey;

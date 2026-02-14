@@ -5,11 +5,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
-
+@Entity
+@Table(name = "chat_messages")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,20 +22,25 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY,optional = false)
+    @JoinColumns({
+            @JoinColumn(name = "project_id",referencedColumnName = "project_id",nullable = false),
+            @JoinColumn(name = "user_id",referencedColumnName = "user_id",nullable = false)
+    })
     ChatSession chatSession;
 
+    @Column(columnDefinition = "text",nullable = false)
     String content;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     MessageRole role;
 
-    String toolCalls; //JSON Array of Tools Called
+   // String toolCalls; //JSON Array of Tools Called
 
     Integer tokensUsed;
 
     @CreationTimestamp
     Instant createdAt;
 
-    @UpdateTimestamp
-    Instant updatedAt;
 }

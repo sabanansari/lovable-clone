@@ -1,9 +1,11 @@
 package com.ansari.projects.lovable_clone.dto.subscription;
 
+import java.time.Instant;
+
 public record SubscriptionResponse(
         PlanResponse plan,
         String status,
-        Integer currentPeriodEnd,
+        Instant currentPeriodEnd,
         Long tokensUsedThisCycle
 ) {
 }

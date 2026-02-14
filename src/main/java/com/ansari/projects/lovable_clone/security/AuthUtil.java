@@ -53,6 +53,7 @@ public class AuthUtil {
 
     public long getCurrentUserId(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if(authentication == null || !(authentication.getPrincipal() instanceof JwtUserPrincipal)) {
             throw new AuthenticationCredentialsNotFoundException("No JWT found");
         }
