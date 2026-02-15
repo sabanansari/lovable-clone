@@ -16,6 +16,7 @@ import com.ansari.projects.lovable_clone.repository.ProjectRepository;
 import com.ansari.projects.lovable_clone.repository.UserRepository;
 import com.ansari.projects.lovable_clone.security.AuthUtil;
 import com.ansari.projects.lovable_clone.services.ProjectService;
+import com.ansari.projects.lovable_clone.services.ProjectTemplateService;
 import com.ansari.projects.lovable_clone.services.SubscriptionService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -39,6 +40,7 @@ public class ProjectServiceImpl implements ProjectService {
     ProjectMapper projectMapper;
     AuthUtil authUtil;
     SubscriptionService subscriptionService;
+    ProjectTemplateService projectTemplateService;
 
     @Override
     public ProjectResponse createProject(ProjectRequest request) {
@@ -74,6 +76,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         projectMemberRepository.save(member);
 
+        projectTemplateService.initializeProjectFromTemplate(project.getId());
 
         return projectMapper.toProjectResponse(project);
     }

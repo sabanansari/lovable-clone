@@ -2,9 +2,9 @@ spring:
   application:
     name: lovable-clone
   datasource:
-    url: jdbc:postgresql://localhost:5432/lovable
-    username: postgres
-    password: force123
+    url: jdbc:postgresql://localhost:9010/pgvector-test
+    username: user
+    password: password
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -14,18 +14,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format-sql: true
-
-  ai:
-    openai:
-      api-key: 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
-      base-url: https://openrouter.ai/api
-      chat:
-        options:
-          model: openrouter/free
-          temperature: 0.0
-
-jwt:
-  secret-key: gfhgfdhdffhgfhgfhgfhgfhgfladfdlfkad32432432432424234324kldfasdklfadsjlkfj324324234slkdfjasdlkfjsadl32
 
 
 

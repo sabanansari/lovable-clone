@@ -1,6 +1,8 @@
 package com.ansari.projects.lovable_clone.services.impl;
 
 import com.ansari.projects.lovable_clone.llm.PromptUtils;
+import com.ansari.projects.lovable_clone.llm.advisors.FileTreeContextAdvisor;
+import com.ansari.projects.lovable_clone.llm.tools.CodeGenerationTools;
 import com.ansari.projects.lovable_clone.security.AuthUtil;
 import com.ansari.projects.lovable_clone.services.AIGenerationService;
 import com.ansari.projects.lovable_clone.services.ProjectFileService;
@@ -25,6 +27,8 @@ public class AIGenerationServiceImpl implements AIGenerationService {
     private final ChatClient chatClient;
     private final AuthUtil authUtil;
     private final ProjectFileService projectFileService;
+    private final FileTreeContextAdvisor fileTreeContextAdvisor;
+
 
     private static final Pattern FILE_TAG_PATTERN = Pattern.compile("<file path=\"([^\"]+)\">(.*?)</file>",Pattern.DOTALL);
 
@@ -41,11 +45,15 @@ public class AIGenerationServiceImpl implements AIGenerationService {
 
         StringBuilder fullResponseBuffer = new StringBuilder();
 
+        CodeGenerationTools codeGenerationTools = new CodeGenerationTools(projectFileService,projectId);
+
         return chatClient.prompt()
                 .system(PromptUtils.CODE_GENERATION_SYSTEM_PROMPT)
                 .user(message)
+                .tools(codeGenerationTools)
                 .advisors(advisorSpec -> {
                            advisorSpec.params(advisorParams);
+                           advisorSpec.advisors(fileTreeContextAdvisor);
                         }
 
                 )
@@ -54,7 +62,6 @@ public class AIGenerationServiceImpl implements AIGenerationService {
                 .doOnNext(response ->{
 
                     String content = response.getResult().getOutput().getText();
-                    log.info("Content recieved: {}", content);
                     fullResponseBuffer.append(content);
                 })
                 .doOnComplete(() -> {
