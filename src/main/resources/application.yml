@@ -2,7 +2,8 @@ spring:
   application:
     name: lovable-clone
   datasource:
-    url: jdbc:postgresql://localhost:9010/pgvector-test
+ #   url: jdbc:postgresql://localhost:9010/pgvector-test
+    url: jdbc:postgresql://pgvector-service:9010/pgvector-test
     username: user
     password: password
     driver-class-name: org.postgresql.Driver
@@ -15,17 +16,3 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format-sql: true
 
-
-
-client.url: http://localhost:8080
-
-logging:
-  level:
-    org.springframework.ai:
-      chat.client: DEBUG
-
-minio:
-  url: http://localhost:9000
-  access-key: minioadmin
-  secret-key: minioadmin123
-  project-bucket: projects

@@ -1,12 +1,10 @@
 package com.ansari.projects.lovable_clone.services;
 
 import com.ansari.projects.lovable_clone.dto.project.FileContentResponse;
-import com.ansari.projects.lovable_clone.dto.project.FileNode;
-
-import java.util.List;
+import com.ansari.projects.lovable_clone.dto.project.FileTreeResponse;
 
 public interface ProjectFileService {
-    List<FileNode> getFileTree(Long projectId);
+    FileTreeResponse getFileTree(Long projectId);
 
     FileContentResponse getFileContent(Long projectId, String path);
 

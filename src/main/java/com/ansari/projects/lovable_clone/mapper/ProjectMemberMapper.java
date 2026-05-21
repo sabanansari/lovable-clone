@@ -10,12 +10,13 @@ import org.mapstruct.Mapping;
 public interface ProjectMemberMapper {
 
     @Mapping(target="userId",source="id")
-    @Mapping(target="projectRole",constant="OWNER")
+    @Mapping(target="role",constant="OWNER")
     MemberResponse toProjectMemberResponseFromOwner(User owner);
 
     @Mapping(target="userId",source="user.id")
     @Mapping(target="username",source="user.username")
     @Mapping(target="name",source="user.name")
+    @Mapping(target="role",source="projectRole")
     @Mapping(target="avatarUrl",source="user.avatarUrl")
     MemberResponse toProjectMemberResponseFromMember(ProjectMember projectMember);
 

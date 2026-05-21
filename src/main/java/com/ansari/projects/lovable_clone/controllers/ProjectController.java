@@ -1,9 +1,10 @@
 package com.ansari.projects.lovable_clone.controllers;
 
+import com.ansari.projects.lovable_clone.dto.deploy.DeployResponse;
 import com.ansari.projects.lovable_clone.dto.project.ProjectRequest;
 import com.ansari.projects.lovable_clone.dto.project.ProjectResponse;
 import com.ansari.projects.lovable_clone.dto.project.ProjectSummaryResponse;
-import com.ansari.projects.lovable_clone.security.AuthUtil;
+import com.ansari.projects.lovable_clone.services.DeploymentService;
 import com.ansari.projects.lovable_clone.services.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.List;
 public class ProjectController {
 
     private final ProjectService projectService;
+    private final DeploymentService deploymentService;
 
     @GetMapping
     public ResponseEntity<List<ProjectSummaryResponse>> getMyProjects(){
@@ -26,7 +28,7 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable Long id){
+    public ResponseEntity<ProjectSummaryResponse> getProjectById(@PathVariable Long id){
 
         return ResponseEntity.ok(projectService.getUserProjectById(id));
     }
@@ -48,6 +50,11 @@ public class ProjectController {
 
         projectService.softDelete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/deploy")
+    public ResponseEntity<DeployResponse> deployProject(@PathVariable Long id){
+        return ResponseEntity.ok(deploymentService.deploy(id));
     }
 
 

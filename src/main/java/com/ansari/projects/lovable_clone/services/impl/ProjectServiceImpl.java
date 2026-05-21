@@ -85,16 +85,21 @@ public class ProjectServiceImpl implements ProjectService {
 
     public List<ProjectSummaryResponse> getUserProjects() {
         Long userId = authUtil.getCurrentUserId();
-        var projects = projectRepository.findAllAccessibleByUser(userId);
-        return projectMapper.toListOfProjectSummaryResponse(projects);
+        var projectWithRoles = projectRepository.findAllAccessibleByUser(userId);
+        return projectWithRoles.stream()
+                .map(p -> projectMapper.toProjectSummaryResponse(p.getProject(), p.getRole()))
+                .toList();
     }
 
     @Override
     @PreAuthorize("@security.canViewProject(#id)")
-    public ProjectResponse getUserProjectById(Long id) {
+    public ProjectSummaryResponse getUserProjectById(Long id) {
         Long userId = authUtil.getCurrentUserId();
-        Project project = getAccessibleProjectById(id, userId);
-        return projectMapper.toProjectResponse(project);
+
+        var projectWithRole = projectRepository.findAccessibleProjectByIdWithRole(id, userId).orElseThrow(
+                () -> new BadRequestException("Project not found with id " + id.toString())
+        );
+        return projectMapper.toProjectSummaryResponse(projectWithRole.getProject(), projectWithRole.getRole());
     }
 
 

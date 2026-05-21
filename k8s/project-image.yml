@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lovable-clone
+  namespace: shuttle-apps
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: lovable-clone
+
+  template:
+    metadata:
+      labels:
+        app: lovable-clone
+
+    spec:
+      containers:
+        - name: lovable-clone
+          image: ansarishaban777/lovable-clone:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 8080
+
+          resources:
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgvector-service
+  namespace: shuttle-apps
+spec:
+  type: ExternalName
+  externalName: host.minikube.internal

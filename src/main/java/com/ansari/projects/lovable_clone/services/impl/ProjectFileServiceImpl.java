@@ -2,6 +2,7 @@ package com.ansari.projects.lovable_clone.services.impl;
 
 import com.ansari.projects.lovable_clone.dto.project.FileContentResponse;
 import com.ansari.projects.lovable_clone.dto.project.FileNode;
+import com.ansari.projects.lovable_clone.dto.project.FileTreeResponse;
 import com.ansari.projects.lovable_clone.entities.Project;
 import com.ansari.projects.lovable_clone.entities.ProjectFile;
 import com.ansari.projects.lovable_clone.error.ResourceNotFoundException;
@@ -40,27 +41,49 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     private String projectBucket;
 
     @Override
-    public List<FileNode> getFileTree(Long projectId) {
+    public FileTreeResponse getFileTree(Long projectId) {
 
         List<ProjectFile> projectFileList = projectFileRepository.findByProjectId(projectId);
 
-        return projectFileMapper.toListOfFileNode(projectFileList);
+        List<FileNode> fileNodes = projectFileMapper.toListOfFileNode(projectFileList);
+        return new FileTreeResponse(fileNodes);
     }
+
+//    @Override
+//    public FileContentResponse getFileContent(Long projectId, String path) {
+//        String objectName = projectId + "/" + path;
+//        try (
+//                InputStream is = minioClient.getObject(
+//                        GetObjectArgs.builder()
+//                                .bucket(BUCKET_NAME)
+//                                .object(objectName)
+//                                .build())) {
+//
+//            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+//            return new FileContentResponse(path, content);
+//        } catch (Exception e) {
+//            log.error("Failed to read file: {}/{}", projectId, path, e);
+//            throw new RuntimeException("Failed to read file content", e);
+//        }
+//    }
 
     @Override
     public FileContentResponse getFileContent(Long projectId, String path) {
-        String objectName = projectId + "/" + path;
-        try (
-                InputStream is = minioClient.getObject(
-                        GetObjectArgs.builder()
-                                .bucket(BUCKET_NAME)
-                                .object(objectName)
-                                .build())) {
+
+        String cleanPath = path.startsWith("/") ? path.substring(1) : path;
+        String objectName = projectId + "/" + cleanPath;
+
+        try (InputStream is = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(BUCKET_NAME)
+                        .object(objectName)
+                        .build())) {
 
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            return new FileContentResponse(path, content);
+            return new FileContentResponse(cleanPath, content);
+
         } catch (Exception e) {
-            log.error("Failed to read file: {}/{}", projectId, path, e);
+            log.error("Failed to read file: {}/{}", projectId, cleanPath, e);
             throw new RuntimeException("Failed to read file content", e);
         }
     }

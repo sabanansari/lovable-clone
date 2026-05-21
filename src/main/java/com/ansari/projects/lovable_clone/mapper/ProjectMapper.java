@@ -3,8 +3,8 @@ package com.ansari.projects.lovable_clone.mapper;
 import com.ansari.projects.lovable_clone.dto.project.ProjectResponse;
 import com.ansari.projects.lovable_clone.dto.project.ProjectSummaryResponse;
 import com.ansari.projects.lovable_clone.entities.Project;
+import com.ansari.projects.lovable_clone.enums.ProjectRole;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -13,8 +13,7 @@ public interface ProjectMapper {
 
     ProjectResponse toProjectResponse(Project project);
 
-    @Mapping(source="name", target="projectName")
-    ProjectSummaryResponse toProjectSummaryResponse(Project project);
+    ProjectSummaryResponse toProjectSummaryResponse(Project project, ProjectRole role);
 
     List<ProjectSummaryResponse> toListOfProjectSummaryResponse(List<Project> projects);
 
