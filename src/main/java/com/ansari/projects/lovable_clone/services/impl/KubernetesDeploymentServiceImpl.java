@@ -8,6 +8,7 @@ import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class KubernetesDeploymentServiceImpl implements DeploymentService {
 
     private final KubernetesClient client;
+    private final StringRedisTemplate redisTemplate;
 
     private static final String NAMESPACE = "shuttle-apps";
     private static final String POOL_LABEL = "status";
@@ -45,6 +47,7 @@ public class KubernetesDeploymentServiceImpl implements DeploymentService {
         log.info("Existing active pod {} for project {}", existingPod != null ? existingPod.getMetadata().getName() : "not found", projectId);
 
         if(existingPod != null){
+            registerRoute(domain, existingPod);
             return new DeployResponse("http://"+domain+":"+REVERSE_PROXY_PORT);
         }
 
@@ -103,6 +106,8 @@ public class KubernetesDeploymentServiceImpl implements DeploymentService {
 
             log.info("Deployment completed for project {} on pod {}. Accessible at http://{}:{}", projectId, podName, domain, REVERSE_PROXY_PORT);
 
+            registerRoute(domain, pod);
+
             return new DeployResponse("http://"+domain+":"+REVERSE_PROXY_PORT);
 
         }catch(Exception e){
@@ -116,6 +121,36 @@ public class KubernetesDeploymentServiceImpl implements DeploymentService {
 
 
     }
+
+    private void registerRoute(String domain, Pod pod){
+        String podIp = pod.getStatus().getPodIP();
+        if(podIp == null) throw new RuntimeException("Pod is running but has no IP!");
+
+        redisTemplate.opsForValue().set("route:"+domain, podIp+":5173",6,TimeUnit.HOURS);
+    }
+
+//    private void registerRoute(String domain, Pod pod){
+//
+//        String podName = pod.getMetadata().getName();
+//
+//        if(podName == null){
+//            throw new RuntimeException("Pod has no name!");
+//        }
+//
+//        String target =
+//                podName + "." +
+//                        NAMESPACE +
+//                        ".pod.cluster.local:5173";
+//
+//        redisTemplate.opsForValue().set(
+//                "route:" + domain,
+//                target,
+//                6,
+//                TimeUnit.HOURS
+//        );
+//
+//        log.info("Registered route {} -> {}", domain, target);
+//    }
 
     private void execCommand(String podName, String container, String... command){
         log.info("Executing command in pod {}: {}", podName, String.join(" ", command));

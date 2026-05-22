@@ -1,0 +1,13 @@
+{
+    "name":"ansar-project-proxy",
+    "version":"1.0.0",
+    "description":"Wildcard proxy for project preview",
+    "main":"index.js",
+    "dependencies": {
+        "http-proxy":"^1.18.1",
+        "ioredis":"^5.3.5"
+    },
+    "scripts":{
+        "start":"node index.js"
+    }
+}

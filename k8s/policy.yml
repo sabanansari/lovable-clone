@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+    name: isolated-project-pods
+    namespace: shuttle-apps
+spec:
+    podSelector:
+        matchLabels:
+          status: busy #Only restrict pods that have been assigned a project
+    policyTypes:
+    - Ingress
+    - Egress
+
+    #INGRESS: Who can taljk to the Runner?
+    ingress:
+      - from:
+          #ALLOW: The ANSARI-PROJECT-PROXY (in the same namespace) can talk to the Runner
+          - podSelector:
+                matchLabels:
+                    app: ansari-project-proxy
+        ports:
+          - protocol: TCP
+            port: 5173 #Allow traffic to the Runner's port
+
+    #EGRESS: Who can the Runner talk to?
+    egress:
+      - to:
+          #ALLOW: The ANSARI-PROJECT-PROXY (in the same namespace)
+          - ipBlock:
+                cidr: 0.0.0.0/0
